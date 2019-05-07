@@ -38,14 +38,34 @@ let todoSchema = new Schema({
   username : String,
   title: String,
   description: String,
-  priority: Number,
+  priority: Number,//Change back to nnumber when properly converted
   dueDate: String, //Use JavaScript Date Object.
   status: Boolean,
   list: String,
 });
 
+let todoModel= new moongose.model("notes", todoSchema);
 app.post("/createNote", (request,response)=>{
-    console.log(request);
+    console.log("Request sends the following", request.body);
 
-    response.send({status:"Ok"});
+    let newNote = new todoModel({
+      username: request.bod.username,
+      title: request.body.title,
+      description:request.body.description,
+      priority:request.body.priority,
+      dueDate:request.body.dueDate,
+      status:request.body.status,
+      list:null,
+    });
+    newNote.save((error)=>{
+      if (error) {
+        console.log("Something happened with mongoose", error);
+        response.sendStatus(500);
+      }else {
+        console.log("Saved mongoose document successfully");
+        response.send({status:"Ok"});
+      }
+    });
+
+
 });
