@@ -38,18 +38,21 @@ let todoSchema = new Schema({
   username : String,
   title: String,
   description: String,
-  priority: Number,//Change back to nnumber when properly converted
+  priority: String,//Change back to nnumber when properly converted
   dueDate: String, //Use JavaScript Date Object.
   status: Boolean,
   list: String,
 });
 
-let todoModel= new moongose.model("notes", todoSchema);
+let todoModel= new mongoose.model("notes", todoSchema);
+
+//A post handler for creating notes
 app.post("/createNote", (request,response)=>{
     console.log("Request sends the following", request.body);
 
+    //creates a new mongoose object for a new note
     let newNote = new todoModel({
-      username: request.bod.username,
+      username: request.body.username,
       title: request.body.title,
       description:request.body.description,
       priority:request.body.priority,
@@ -57,15 +60,48 @@ app.post("/createNote", (request,response)=>{
       status:request.body.status,
       list:null,
     });
+
+    //Save note to MongoDB
     newNote.save((error)=>{
       if (error) {
         console.log("Something happened with mongoose", error);
+        //Respond to front end if failed
         response.sendStatus(500);
       }else {
         console.log("Saved mongoose document successfully");
+        //Respond to front end if succeeded
         response.send({status:"Ok"});
       }
     });
+});
 
+//A post handler for reading notes from the db and sending them to the front end
+app.post("/readNotes",(request, response)=>{
+    //Searches the MongoDB database and get all the notes
+    todoModel.find({}, (error, results)=>{
+      if (error) {
+        // If there is an error, send to front end code 500
+        console.log("Something happened with mongoose", error);
+        response.sendStatus(500);
+      }else {
+        // Otherwise send to front end what we got from database
+        let dataToSend= {notes:results};
+        response.send(dataToSend);
+      }
+    });
+});
 
+//A post handler for deleting a note from the database
+app.post("/deleteNote",(request,response)=>{
+  //Searches the MongoDB by an ID, and deletes this document.
+  todoModel.findByIdAndDelete(request.body._id,(error, results)=>{
+    if (error) {
+      //If there is an error, send to front end code 500
+      console.log("Something happened with mongoose.", error);
+      response.sendStatus(500);
+    }else {
+      // Otherwise, send to front end, the item we deleted that is stored in the variable results
+      response.send({deleted:results});
+    }
+  });
 });
