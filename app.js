@@ -58,20 +58,22 @@ app.post("/createNote", (request,response)=>{
       priority:request.body.priority,
       dueDate:request.body.dueDate,
       status:request.body.status,
-      list:null,
+      list:null
     });
 
     //Save note to MongoDB
     newNote.save((error)=>{
-      if (error) {
-        console.log("Something happened with mongoose", error);
-        //Respond to front end if failed
-        response.sendStatus(500);
-      }else {
-        console.log("Saved mongoose document successfully");
-        //Respond to front end if succeeded
-        response.send({status:"Ok"});
-      }
+      // if (error) {
+      //   console.log("Something happened with mongoose", error);
+      //   //Respond to front end if failed
+      //   response.sendStatus(500);
+      // }else {
+      //   console.log("Saved mongoose document successfully");
+      //   //Respond to front end if succeeded
+      //   response.send({status:"Ok"}); //or send sendStatus(200) for status Ok
+      // }
+      //OR
+      responseState(error, response, 200);
     });
 });
 
@@ -79,15 +81,17 @@ app.post("/createNote", (request,response)=>{
 app.post("/readNotes",(request, response)=>{
     //Searches the MongoDB database and get all the notes
     todoModel.find({}, (error, results)=>{
-      if (error) {
-        // If there is an error, send to front end code 500
-        console.log("Something happened with mongoose", error);
-        response.sendStatus(500);
-      }else {
-        // Otherwise send to front end what we got from database
-        let dataToSend= {notes:results};
-        response.send(dataToSend);
-      }
+      // if (error) {
+      //   // If there is an error, send to front end code 500
+      //   console.log("Something happened with mongoose", error);
+      //   response.sendStatus(500);
+      // }else {
+      //   // Otherwise send to front end what we got from database
+      //   let dataToSend= {notes:results};
+      //   response.send(dataToSend);
+      // }
+      //OR
+      responseState(error, response, {notes:results});
     });
 });
 
@@ -95,13 +99,94 @@ app.post("/readNotes",(request, response)=>{
 app.post("/deleteNote",(request,response)=>{
   //Searches the MongoDB by an ID, and deletes this document.
   todoModel.findByIdAndDelete(request.body._id,(error, results)=>{
-    if (error) {
-      //If there is an error, send to front end code 500
-      console.log("Something happened with mongoose.", error);
-      response.sendStatus(500);
-    }else {
-      // Otherwise, send to front end, the item we deleted that is stored in the variable results
-      response.send({deleted:results});
-    }
+    // if (error) {
+    //   //If there is an error, send to front end code 500
+    //   console.log("Something happened with mongoose.", error);
+    //   response.sendStatus(500);
+    // }else {
+    //   // Otherwise, send to front end, the item we deleted that is stored in the variable results
+    //   response.send({deleted:results});
+    // }
+    //OR
+    responseState(error,response, {deleted: results});
   });
 });
+
+app.post("/updateNote", (request, response)=>{
+
+  let propertiesToUpdate = {
+    username: request.body.username,
+    title: request.body.title,
+    description:request.body.description,
+    priority:request.body.priority,
+    dueDate:request.body.dueDate,
+    status:request.body.status,
+    list:null
+  };
+  todoModel.findByIdAndUpdate(request.body._id,propertiesToUpdate, (error,results)=>{
+    // if (error) {
+    //   console.log("something happened with mongoose", error);
+    //   response.sendStatus(500);
+    // }else {
+    //   response.send({updated:results});
+    // }
+    //or
+    responseState(error, response, {updated:results});
+  });
+});
+
+
+/*
+      newNote.save((error)=>{
+        if (error) {
+          console.log("Something happened with mongoose", error);
+          response.sendStatus(500);
+        }else {
+          console.log("Saved mongoose document successfully");
+          response.send({status:"Ok"}); //or send sendStatus(200) for status Ok
+        }
+      });
+
+      todoModel.find({}, (error, results)=>{
+        if (error) {
+          console.log("Something happened with mongoose", error);
+          response.sendStatus(500);
+        }else {
+          let dataToSend= {notes:results};
+          response.send(dataToSend);
+        }
+      });
+
+      todoModel.findByIdAndDelete(request.body._id,(error, results)=>{
+        if (error) {
+          console.log("Something happened with mongoose.", error);
+          response.sendStatus(500);
+        }else {
+          response.send({deleted:results});
+        }
+      });
+
+
+      todoModel.findByIdAndUpdate(request.body._id,propertiesToUpdate, (error,results)=>{
+        if (error) {
+          console.log("something happened with mongoose", error);
+          response.sendStatus(500);
+        }else {
+          response.send({updated:results});
+        }
+      });
+*/
+
+function responseState(error, response, send){
+  console.log("ran");
+    if (error) {
+      console.log("Something happened withj mongoose", error);
+      response.sendStatus(500);
+    }else {
+      if (typeof send == "number") {
+        response.sendStatus(send);
+      }else if (typeof send == "object") {
+        response.send(send);
+      }
+    }
+};
