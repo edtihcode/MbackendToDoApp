@@ -1,0 +1,67 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>HomePage To Do App</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+
+  <link rel="stylesheet" href="styles/styles.css?v=1.0">
+  <script src="scripts/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+
+  <div id="container">
+      <h1>Title</h1>
+      <button type="button" name="button">Create New Note</button>
+        <div id="list">
+          <ul>
+
+          </ul>
+        </div>
+  </div>
+  <script>
+    $(document).ready(()=>{
+      $.post("http://localhost:3000/readNotes",{} ,(response)=>{
+          console.log(response);
+          let notesArray = response.notes;
+
+          for (var i = 0; i < notesArray.length; i++) {
+            let currentNote = notesArray[i]
+            let listItem= `<li data-id="${currentNote._id}">
+                                ${currentNote.title},
+                                ${currentNote.description},
+                                ${currentNote.dueDate},
+                                ${currentNote.description},
+                                <button>Edit</button>
+                                <button class="Delete">Delete</button>
+
+                            </li>`;
+                                // use data-(anyName) to set custom attributes
+
+          $("#list ul").append(listItem);
+        }// select list ul in list items to append
+
+          $(".Delete").click(function(){
+              // deleting the parent you just click with this each .parent goes up one level
+              console.log($(this).parent().parent());
+              let idToDelete = {_id : $(this).parent().attr("data-id")};
+
+              $.post("http://localhost:3000/deleteNote", idToDelete, (response)=> {
+                if (response !=500) {
+                  $(this).parent().remove();
+                }
+              });
+
+
+          });
+
+
+        });
+    });
+  </script>
+</body>
+</html>
