@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
 
-  <title>Edit Note</title>
+  <title>Edit To Do App</title>
   <meta name="description" content="The HTML5 Herald">
   <meta name="author" content="SitePoint">
 
@@ -13,8 +13,80 @@
 </head>
 
 <body>
+  <a href="index.html">Go Back to List </a>
+  <p>Title</p>
+  <input type = "text" id ="title"/>
+  <p>Description</p>
+  <input type = "text" id ="description"/>
+  <p>Priority</p>
+  <input type = "text" id ="priority"/>
+  <p>Due Date</p>
+  <input type = "text" id ="due-date"/>
+  <button id="create-note">Create Note</button>
+
   <script>
-    $(document).ready(()=>{});
+    $(document).ready(()=>{
+
+      const searchParams = new URLSearchParams(window.location.search);
+
+      if (searchParams.has("id")) {
+        $("#create-note").html("Save Changes");
+        $.post("http://localhost:3000/readNotes", {},(response)=>{
+          let notesArray = response.notes;
+          let matchedNote;
+          for (let i = 0; i < notesArray.length; i++) {
+            if (notesArray[i]._id === searchParams.get("id")) {
+
+              matchedNote = notesArray[i];
+              break;
+            }
+          }
+          $("#title").val(matchedNote.title);
+          $("#description").val(matchedNote.description);
+          $("#priority").val(matchedNote.priority);
+          $("#due-date").val(matchedNote.dueDate);
+
+          $("#create-note").click(function(){
+            let updatedNote ={
+                _id: matchedNote._id,
+                username: null,
+                title: $("#title").val(),
+                description: $("#description").val(),
+                priority: $("#priority").val(),
+                dueDate: $("#due-date").val(),
+                status: true
+            };
+
+            $.post("http://localhost:3000/updateNote", updatedNote,()=>{
+              $("body").append("<p>Your note was saved!</p>");
+            });
+            window.setTimeout(()=>{window.location = "http://localhost:3000/"},1000);
+          });
+        });
+
+        console.log("Edit Note");
+      }else {
+        console.log("Creat Mode");
+        $("#create-note").click(function(){
+          let newNote ={
+              username: null,
+              title: $("#title").val(),
+              description: $("#description").val(),
+              priority: $("#priority").val(),
+              dueDate: $("#due-date").val(),
+              status: true
+          };
+
+          $.post("http://localhost:3000/createNote",newNote, (response)=>{
+            //addpend the data from the backend when you receive a responde
+            $("body").append('<p>Your note was saved!</p>');
+          });
+            window.setTimeout(()=>{window.location = "http://localhost:3000/"},1000);//window.location brings it to a new url when the scope runs
+            //window.setTimeout(function, milliseconds); sets a delay timer to execute after certain time
+        });
+
+      }
+    });
   </script>
 </body>
 </html>

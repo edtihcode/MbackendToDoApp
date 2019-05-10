@@ -16,7 +16,7 @@
 
   <div id="container">
       <h1>Title</h1>
-      <button type="button" name="button">Create New Note</button>
+      <button type="button" name="button"><a href="edit-note.html">Create New Note</a></button>
         <div id="list">
           <ul>
 
@@ -32,14 +32,17 @@
           for (var i = 0; i < notesArray.length; i++) {
             let currentNote = notesArray[i]
             let listItem= `<li data-id="${currentNote._id}">
-                                ${currentNote.title},
+                                ${currentNote.title},<a href="http://localhost:3000/edit-note.html?id=${currentNote._id}"><button>Edit Note</button></a><button class="Delete">Delete</button> <br>
                                 ${currentNote.description},
                                 ${currentNote.dueDate},
-                                ${currentNote.description},
-                                <button>Edit</button>
-                                <button class="Delete">Delete</button>
+                                ${currentNote.priority},
+                                ${currentNote.status},<br><br>
+
+
 
                             </li>`;
+
+                                //use ? to get the _id  href="http://localhost:3000/edit-note.html?id=${currentNote._id}"
                                 // use data-(anyName) to set custom attributes
 
           $("#list ul").append(listItem);
